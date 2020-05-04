@@ -2,7 +2,10 @@ package com.bedrock.android_grpc;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -12,8 +15,14 @@ import android.widget.Toast;
 
 import com.bedrock.android_grpc.grpc.gRpcChannelUtils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.TimeUnit;
+
 import io.grpc.ManagedChannel;
 
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
 
@@ -36,12 +45,66 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_send).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendRequest();
+                //sendRequest();
+                request();
+
 
             }
         });
 
     }
+    private void request(){
+        String host = etHost.getText().toString();
+        String port = etPort.getText().toString();
+        String msg = etMsg.getText().toString();
+        new GrpcTask(this)
+                .execute(host,msg,port);
+    }
+
+    private static class GrpcTask extends AsyncTask<String, Void, String> {
+        private final WeakReference<Activity> activityReference;
+        private ManagedChannel channel;
+
+        private GrpcTask(Activity activity) {
+            this.activityReference = new WeakReference<Activity>(activity);
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String host = params[0];
+            String message = params[1];
+            String portStr = params[2];
+            int port = TextUtils.isEmpty(portStr) ? 0 : Integer.valueOf(portStr);
+            try {
+                channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+                GreeterGrpc.GreeterBlockingStub stub = GreeterGrpc.newBlockingStub(channel);
+                HelloRequest request = HelloRequest.newBuilder().setName(message).build();
+                HelloReply reply = stub.sayHello(request);
+                return reply.getMessage();
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                pw.flush();
+                return String.format("Failed... : %n%s", sw);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                channel.shutdown().awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            Activity activity = activityReference.get();
+            if (activity == null) {
+                return;
+            }
+            Log.i("grpc", "________" + result);
+        }
+    }
+
 
     GreeterGrpc.GreeterStub mStub;
 
