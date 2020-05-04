@@ -28,6 +28,7 @@ android {
 protobuf {
     protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
     plugins {
+        javalite { artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0" }
         grpc { artifact = 'io.grpc:protoc-gen-grpc-java:1.29.0' // CURRENT_GRPC_VERSION
         }
     }
@@ -37,6 +38,7 @@ protobuf {
                 java { option 'lite' }
             }
             task.plugins {
+                javalite {}
                 grpc { // Options added to --grpc_out
                     option 'lite' }
             }

@@ -11,21 +11,36 @@
     <EditText
         android:id="@+id/et_host"
         android:hint="input host"
+        android:text="127.0.0.1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>w
     <EditText
         android:id="@+id/et_port"
         android:hint="input port"
+        android:text="8080"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <EditText
         android:id="@+id/et_message"
+        android:text="你好"
         android:hint="input message for send "
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <Button
         android:id="@+id/btn_send"
         android:text="send message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="服务端回复"
+        android:textSize="18sp"
+        android:textColor="#333333"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/tv_response"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
